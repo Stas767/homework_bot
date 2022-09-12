@@ -63,7 +63,7 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
-    """Проверяет ответ API на корректность"""
+    """Проверяет ответ API на корректность."""
     if type(response) is not dict:
         raise TypeError(
             'response имеет тип не являющийся словарем'
