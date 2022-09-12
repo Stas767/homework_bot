@@ -66,7 +66,7 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """Проверяет ответ API на корректность"""
-    # Если ответ соответствует ожиданиям, то должна вернуть список домашних работ по ключу 'homeworks'
+
     if type(response) is not dict:
         raise TypeError(
             'response имеет тип не являющийся словарем'
@@ -84,10 +84,6 @@ def check_response(response):
 
 def parse_status(homework):
     """Извлекает статус конкретной работы."""
-    # Получает только один элемент из списка домашки. В случае успеха возвращает подготовленую для отправки в Телеграм строку,
-    # содержащую один из вердиктов словаря HOMEWORK_STATUSES
-    # недокументированный статус домашней работы, обнаруженный в ответе API (уровень ERROR);
-    # отсутствие в ответе новых статусов (уровень DEBUG).
 
     for key in 'homework_name', 'status':
         if key not in homework:
@@ -114,10 +110,6 @@ def check_tokens():
 
 def main():
     """Основная логика работы бота."""
-    # 1. Сделать запрос к АПИ
-    # 2. Проверить ответ
-    # 3. Если есть обновление - получить статус работы из обновления и отправить смс в телеграм
-    # 4. Подождать 10 мин и отправить запрос заново.
 
     if check_tokens():
         logger.info('Старт бота! Переменные доступны.')
@@ -126,7 +118,7 @@ def main():
         sys.exit()
 
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    current_timestamp = int(time.time()) - 86400 * 60
+    current_timestamp = int(time.time())
 
     while True:
 
