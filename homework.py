@@ -39,7 +39,6 @@ HOMEWORK_STATUSES = {
 
 def send_message(bot, message):
     """Отправляет сообщение в Telegram чат."""
-
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
         logger.info(f'Отправлено сообщение в телеграм: {message}')
@@ -50,7 +49,6 @@ def send_message(bot, message):
 
 def get_api_answer(current_timestamp):
     """Делает запрос к API. Возвращает ответ в типе данных Python."""
-
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
 
@@ -66,7 +64,6 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """Проверяет ответ API на корректность"""
-
     if type(response) is not dict:
         raise TypeError(
             'response имеет тип не являющийся словарем'
@@ -84,7 +81,6 @@ def check_response(response):
 
 def parse_status(homework):
     """Извлекает статус конкретной работы."""
-
     for key in 'homework_name', 'status':
         if key not in homework:
             raise KeyError(f'Отсутсвует ключ: {key}')
@@ -102,7 +98,6 @@ def parse_status(homework):
 
 def check_tokens():
     """Проверка доступности переменных окружения."""
-
     if PRACTICUM_TOKEN and TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
         return True
     return False
@@ -110,7 +105,6 @@ def check_tokens():
 
 def main():
     """Основная логика работы бота."""
-
     if check_tokens():
         logger.info('Старт бота! Переменные доступны.')
     else:
