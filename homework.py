@@ -67,7 +67,10 @@ def get_api_answer(current_timestamp):
 def check_response(response):
     """Проверяет ответ API на корректность"""
     # Если ответ соответствует ожиданиям, то должна вернуть список домашних работ по ключу 'homeworks'
-
+    if type(response) is not dict:
+        raise TypeError(
+            'response имеет тип не являющийся словарем'
+        )
     expected_keys = {"homeworks": [], "current_date": 1634074965}
     if expected_keys.keys() != response.keys():
         logger.error('В ответе API нет ожидаемых ключей')
@@ -83,14 +86,18 @@ def parse_status(homework):
     """Извлекает статус конкретной работы."""
     # Получает только один элемент из списка домашки. В случае успеха возвращает подготовленую для отправки в Телеграм строку,
     # содержащую один из вердиктов словаря HOMEWORK_STATUSES
+    # недокументированный статус домашней работы, обнаруженный в ответе API (уровень ERROR);
+    # отсутствие в ответе новых статусов (уровень DEBUG).
+
+    for key in 'homework_name', 'status':
+        if key not in homework:
+            raise KeyError(f'Отсутсвует ключ: {key}')
 
     homework_name = homework['homework_name']
     homework_status = homework['status']
 
-    # if 'homework_name' not in homework:
-    #     raise KeyError(
-    #         'Отсутствуют ключ "homework_name" : homework = {homework}.'
-    #     )
+    if homework_status not in HOMEWORK_STATUSES:
+        raise TypeError('Такого статуса проверки нет!')
 
     verdict = HOMEWORK_STATUSES[homework_status]
 
