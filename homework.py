@@ -132,7 +132,7 @@ def main():
             logger.error(message)
             send_message(bot, message)
         finally:
-            time.sleep(5)
+            time.sleep(RETRY_TIME)
 
 
 if __name__ == '__main__':
