@@ -39,12 +39,12 @@ HOMEWORK_STATUSES = {
 
 def send_message(bot, message):
     """Отправляет сообщение в Telegram чат."""
+    logger.info('Подготовка к отправке сообщения в Telegram')
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
         logger.info(f'Отправлено сообщение в телеграм: {message}')
     except Exception:
         logger.error('Сбой при отправке сообщения в Telegram')
-        sys.exit()
 
 
 def get_api_answer(current_timestamp):
@@ -59,23 +59,29 @@ def get_api_answer(current_timestamp):
     logger.error(
         f'Эндпоинт недоступен! Статус ответа: {response.status_code}'
     )
-    sys.exit()
+    logger.error(
+        f'Параметры неудачного запроса: {ENDPOINT}, {HEADERS}, {params}.'
+    )
+    raise TypeError(f'Статус ответа сервера: {response.status_code}.')
 
 
 def check_response(response):
     """Проверяет ответ API на корректность."""
-    if type(response) is not dict:
+    logger.info('Начало проверки ответа сервера.')
+    if not isinstance(response, dict):
         raise TypeError(
             'response имеет тип не являющийся словарем'
         )
-    expected_keys = {"homeworks": [], "current_date": 1634074965}
-    if expected_keys.keys() != response.keys():
-        logger.error('В ответе API нет ожидаемых ключей')
-        sys.exit()
-    while response['homeworks'] == []:
-        logger.info('Домашней работы для проверки нет')
-        time.sleep(RETRY_TIME)
+    # Не смог сделать через оператор :=,
+    # так как его нет еще в этой версии питона. Он с 3.8+
+    missed_keys = {'homeworks', 'current_date'} - response.keys()
+    if missed_keys:
+        logger.error(f'В ответе API нет ожидаемых ключей: {missed_keys}')
     list_homework = response['homeworks']
+    if response['homeworks'] == []:
+        logger.info('Домашней работы для проверки нет')
+        raise TypeError('Домашней работы для проверки нет')
+    logger.info('Начало обработки домашней работы')
     return list_homework[0]
 
 
@@ -108,28 +114,25 @@ def main():
     if check_tokens():
         logger.info('Старт бота! Переменные доступны.')
     else:
-        logger.critical('Переменные не доступны!')
-        sys.exit()
+        sys.exit(logger.critical('Переменные не доступны!'))
 
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    current_timestamp = int(time.time())
 
     while True:
 
         try:
+            current_timestamp = int(time.time())
+            print(current_timestamp)
             response = get_api_answer(current_timestamp)
             list_homework = check_response(response)
             message = parse_status(list_homework)
             send_message(bot, message)
-            current_timestamp = response['current_date']
-            time.sleep(RETRY_TIME)
-
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logger.error(message)
-            time.sleep(RETRY_TIME)
-        else:
-            pass
+            send_message(bot, message)
+        finally:
+            time.sleep(5)
 
 
 if __name__ == '__main__':
