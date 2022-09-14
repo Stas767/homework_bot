@@ -117,16 +117,15 @@ def main():
         sys.exit(logger.critical('Переменные не доступны!'))
 
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
+    current_timestamp = int(time.time())
 
     while True:
-
         try:
-            current_timestamp = int(time.time())
-            print(current_timestamp)
             response = get_api_answer(current_timestamp)
             list_homework = check_response(response)
             message = parse_status(list_homework)
             send_message(bot, message)
+            current_timestamp = response['current_date']
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logger.error(message)
